@@ -10,6 +10,12 @@ public:
 
     std::unique_ptr<cv::Mat> applyFilter() override;;
 
+private:
+    std::vector<int>
+    aggregateNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange);
+
+    int calculateMedianValueOfNeighbourhood(std::vector<int> values);
+
 };
 
 
