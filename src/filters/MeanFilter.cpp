@@ -20,20 +20,32 @@ std::unique_ptr<cv::Mat> MeanFilter::applyFilter() {
 
     for (int x = 1; x < numCols - 1; x++) {
         for (int y = 1; y < numRows - 1; y++) {
-            int sum = 0;
-            for (int dx : xKernelRange) {
-                for (int dy : yKernelRange) {
-                    int pixelX = x + dx;
-                    int pixelY = y + dy;
-                    auto value = static_cast<int>(this->sourceImage->at<uchar>(pixelY, pixelX));
-                    sum += value;
-                }
-            }
-            float average = (float) sum / (float) (xKernelRange.size() * yKernelRange.size());
+            int sum = calculateSumOfNeighbourhood(x, y, xKernelRange, yKernelRange);
+            float average = calculateAverageofNeighbourhood(sum,
+                                                            static_cast<int>(xKernelRange.size()),
+                                                            static_cast<int>(yKernelRange.size())) ;
             ( outputImage.get())->at<uchar>(y, x) = average;
         }
 
     }
 
     return outputImage;
+}
+
+
+int MeanFilter::calculateSumOfNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange) {
+    int sum = 0;
+    for (int dx : xKernelRange) {
+        for (int dy : yKernelRange) {
+            int pixelX = centerX + dx;
+            int pixelY = centerY + dy;
+            auto value = static_cast<int>(this->sourceImage->at<uchar>(pixelY, pixelX));
+            sum += value;
+        }
+    }
+    return sum;
+}
+
+float MeanFilter::calculateAverageofNeighbourhood(int sum, int xKernelSize, int yKernelSize) {
+    return (float) sum / (float) (xKernelSize * yKernelSize);
 }
