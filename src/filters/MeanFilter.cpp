@@ -1,7 +1,3 @@
-//
-// Created by ryan on 28/10/17.
-//
-
 #include "MeanFilter.h"
 
 std::unique_ptr<cv::Mat> MeanFilter::applyFilter() {

@@ -1,7 +1,3 @@
-//
-// Created by ryan on 28/10/17.
-//
-
 #include "MedianFilter.h"
 
 std::unique_ptr<cv::Mat> MedianFilter::applyFilter() {
