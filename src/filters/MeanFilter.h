@@ -10,6 +10,8 @@ public:
 
     std::unique_ptr<cv::Mat> applyFilter() override;;
 
+private:
+
     float calculateAverageofNeighbourhood(int sum, int xKernelSize, int yKernelSize);
 
     int calculateSumOfNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange);

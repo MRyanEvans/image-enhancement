@@ -3,7 +3,7 @@ project(image_enhancement_implementation)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(SOURCE_FILES src/main.cpp src/filters/FilterInterface.h src/filters/SpatialDomainFilter.h src/filters/MedianFilter.cpp src/filters/MedianFilter.h src/filters/MeanFilter.cpp src/filters/MeanFilter.h src/kernel.cpp src/kernel.h)
+set(SOURCE_FILES src/main.cpp src/filters/FilterInterface.h src/filters/SpatialDomainFilter.h src/filters/MedianFilter.cpp src/filters/MedianFilter.h src/filters/MeanFilter.cpp src/filters/MeanFilter.h src/filters/HighPassFilter.h src/filters/HighPassFilter.cpp src/kernel.cpp src/kernel.h)
 
 add_executable(image_enhancement_implementation ${SOURCE_FILES})
 

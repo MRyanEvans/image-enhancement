@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "filters/MedianFilter.h"
 #include "filters/MeanFilter.h"
+#include "filters/HighPassFilter.h"
 
 using namespace std;
 using namespace cv;
@@ -98,6 +99,9 @@ int main() {
     unique_ptr<MeanFilter> meanFilter = make_unique<MeanFilter>(image);
     auto meanFilteredImage = *(meanFilter.get())->applyFilter();
 
+    unique_ptr<HighPassFilter> highPassFilter = make_unique<HighPassFilter>(image);
+    auto highPassFilteredImage = *(highPassFilter.get())->applyFilter();
+
     string noisyImageWindowName = "Image with Noise";
 
     cv::namedWindow(noisyImageWindowName, cv::WINDOW_AUTOSIZE);
@@ -113,6 +117,11 @@ int main() {
 
     cv::namedWindow(meanFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
     cv::imshow(meanFilteredImageWindowName, meanFilteredImage);
+
+    string highPassFilteredImageWindowName = "High Pass Filtered Image";
+
+    cv::namedWindow(highPassFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
+    cv::imshow(highPassFilteredImageWindowName, highPassFilteredImage);
 
 
     cv::waitKey(0);
