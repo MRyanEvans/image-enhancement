@@ -2,11 +2,7 @@
 #include <opencv2/core/utility.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "filters/MedianFilter.h"
-#include "filters/MeanFilter.h"
-#include "filters/HighPassFilter.h"
-#include "filters/GaussianFilter.h"
-#include "FilterApplicator.h"
+#include "ImageEnhancer.h"
 
 using namespace std;
 using namespace cv;
@@ -90,89 +86,9 @@ void runDFT(Mat image) {
 
 }
 
-float
-calculateMeanSquaredError(Mat* originalImage, Mat* modifiedImage) {
-    float mse;
-    int M = originalImage->cols;
-    int N = originalImage->rows;
-    int sumSquaredError = 0;
-    for (int x = 0; x < M; x++) {
-        for (int y = 0; y < N; y++) {
-            int valueOriginal= originalImage->at<uchar>(y, x);
-            int valueModified = modifiedImage->at<uchar>(y, x);
-            int error = valueOriginal - valueModified;
-            sumSquaredError += (error * error);
-        }
-
-    }
-    mse = (float) sumSquaredError / (float) (M * N);
-    return mse;
-}
-
 int main() {
-    string filename = "resources/images/PandaNoise.bmp";
-    auto image = make_shared<cv::Mat>(cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE));
+    ImageEnhancer imageEnhancer;
+    return imageEnhancer.run();
 
-    if (!image.get()->data) {
-        cout << "Could not open image:  " << filename << endl;
-        return -1;
-    }
-
-    string originalImageFilename = "resources/images/PandaOriginal.bmp";
-    Mat originalImage = cv::imread(originalImageFilename, CV_LOAD_IMAGE_GRAYSCALE);
-
-    if (!originalImage.data) {
-        cout << "Could not open image:  " << filename << endl;
-        return -1;
-    }
-
-    unique_ptr<MedianFilter> medianFilter = make_unique<MedianFilter>(image);
-    auto medianFilteredImage = *(medianFilter.get())->applyFilter();
-
-    unique_ptr<MeanFilter> meanFilter = make_unique<MeanFilter>(image);
-    auto meanFilteredImage = *(meanFilter.get())->applyFilter();
-
-    unique_ptr<HighPassFilter> highPassFilter = make_unique<HighPassFilter>(image);
-    auto highPassFilteredImage = *(highPassFilter.get())->applyFilter();
-
-    unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
-    auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
-
-    string originalImageWindowName = "Original Image";
-
-    cv::namedWindow(originalImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(originalImageWindowName, originalImage);
-
-    string noisyImageWindowName = "Image with Noise";
-
-    cv::namedWindow(noisyImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(noisyImageWindowName, *(image.get()));
-
-    string medianFilteredImageWindowName = "Median Filtered Image";
-
-    cv::namedWindow(medianFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(medianFilteredImageWindowName, medianFilteredImage);
-
-
-    string meanFilteredImageWindowName = "Mean Filtered Image";
-
-    cv::namedWindow(meanFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(meanFilteredImageWindowName, meanFilteredImage);
-
-    string highPassFilteredImageWindowName = "High Pass Filtered Image";
-
-    cv::namedWindow(highPassFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(highPassFilteredImageWindowName, highPassFilteredImage);
-
-    string gaussianFilteredImageWindowName = "Gaussian Filtered Image";
-
-    cv::namedWindow(gaussianFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(gaussianFilteredImageWindowName, gaussianFilteredImage);
-
-    float mse = calculateMeanSquaredError(&originalImage, &gaussianFilteredImage);
-    cout << mse << endl;
-    cv::waitKey(0);
-
-    return 0;
 }
 
