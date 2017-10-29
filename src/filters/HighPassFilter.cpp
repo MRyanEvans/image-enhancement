@@ -1,4 +1,5 @@
 #include "HighPassFilter.h"
+#include "../KernelImageConvolver.h"
 
 std::unique_ptr<cv::Mat> HighPassFilter::applyFilter() {
     std::unique_ptr<cv::Mat> outputImage = std::make_unique<cv::Mat>(
@@ -29,14 +30,15 @@ std::unique_ptr<cv::Mat> HighPassFilter::applyFilter() {
 }
 
 
-int HighPassFilter::calculateSumOfNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange) {
+int HighPassFilter::calculateSumOfNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange,
+                                                std::vector<int> yKernelRange) {
     int sum = 0;
     for (int dx : xKernelRange) {
         for (int dy : yKernelRange) {
             int pixelX = centerX + dx;
             int pixelY = centerY + dy;
             auto value = static_cast<int>(this->sourceImage->at<uchar>(pixelY, pixelX));
-            if(pixelX == centerX && pixelY == centerY) {
+            if (pixelX == centerX && pixelY == centerY) {
                 value *= -1;
             } else {
                 value *= 8;

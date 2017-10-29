@@ -16,6 +16,7 @@ public:
     int getDivisor() const;
 
     const std::vector<int> &getCoefficients() const;
+    int getCoefficient(int x, int y);
 
 private:
     int size;

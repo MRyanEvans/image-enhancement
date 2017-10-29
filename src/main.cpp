@@ -5,6 +5,7 @@
 #include "filters/MedianFilter.h"
 #include "filters/MeanFilter.h"
 #include "filters/HighPassFilter.h"
+#include "filters/GaussianFilter.h"
 
 using namespace std;
 using namespace cv;
@@ -102,6 +103,9 @@ int main() {
     unique_ptr<HighPassFilter> highPassFilter = make_unique<HighPassFilter>(image);
     auto highPassFilteredImage = *(highPassFilter.get())->applyFilter();
 
+    unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
+    auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
+
     string noisyImageWindowName = "Image with Noise";
 
     cv::namedWindow(noisyImageWindowName, cv::WINDOW_AUTOSIZE);
@@ -122,6 +126,11 @@ int main() {
 
     cv::namedWindow(highPassFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
     cv::imshow(highPassFilteredImageWindowName, highPassFilteredImage);
+
+    string gaussianFilteredImageWindowName = "Gaussian Filtered Image";
+
+    cv::namedWindow(gaussianFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
+    cv::imshow(gaussianFilteredImageWindowName, gaussianFilteredImage);
 
 
     cv::waitKey(0);
