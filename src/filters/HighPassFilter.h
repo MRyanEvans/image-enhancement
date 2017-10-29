@@ -4,6 +4,10 @@
 
 #include "SpatialDomainFilter.h"
 
+/**
+ * A filter favouring higher-frequency values.
+ * This is not likely to be useful for image smoothing/noise reduction but is interesting nonetheless.
+ */
 class HighPassFilter : public SpatialDomainFilter {
 public:
     explicit HighPassFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
@@ -11,10 +15,6 @@ public:
     std::unique_ptr<cv::Mat> applyFilter() override;;
 
 private:
-    float calculateAverageofNeighbourhood(int sum, int xKernelSize, int yKernelSize);
-
-    int
-    calculateSumOfNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange);
 };
 
 

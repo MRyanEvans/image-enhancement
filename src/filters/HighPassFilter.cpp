@@ -1,6 +1,10 @@
 #include "HighPassFilter.h"
 #include "../KernelImageConvolver.h"
 
+/**
+ * Applies a generic high pass kernel to an image.
+ * @return The filtered image.
+ */
 std::unique_ptr<cv::Mat> HighPassFilter::applyFilter() {
     std::unique_ptr<cv::Mat> outputImage = std::make_unique<cv::Mat>(
             this->sourceImage.get()->rows,

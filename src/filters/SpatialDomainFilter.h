@@ -4,6 +4,9 @@
 
 #include "FilterInterface.h"
 
+/**
+ * Dummy class to provide further abstraction of specifically spatial filters.
+ */
 class SpatialDomainFilter : public FilterInterface {
 public:
     explicit SpatialDomainFilter(const std::shared_ptr<cv::Mat> image) : FilterInterface(image) {};

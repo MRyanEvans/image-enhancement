@@ -6,7 +6,7 @@
 #include <opencv/cv.hpp>
 #include "ImageEnhancer.h"
 #include "filters/MedianFilter.h"
-#include "filters/MeanFilter.h"
+#include "filters/LowPassFilter.h"
 #include "filters/HighPassFilter.h"
 #include "filters/GaussianFilter.h"
 
@@ -39,8 +39,8 @@ int ImageEnhancer::run() {
     unique_ptr<MedianFilter> medianFilter = make_unique<MedianFilter>(image);
     auto medianFilteredImage = *(medianFilter.get())->applyFilter();
 
-    unique_ptr<MeanFilter> meanFilter = make_unique<MeanFilter>(image);
-    auto meanFilteredImage = *(meanFilter.get())->applyFilter();
+    unique_ptr<LowPassFilter> lowPassFilter = make_unique<LowPassFilter>(image);
+    auto lowPassFilteredImage = *(lowPassFilter.get())->applyFilter();
 
     unique_ptr<HighPassFilter> highPassFilter = make_unique<HighPassFilter>(image);
     auto highPassFilteredImage = *(highPassFilter.get())->applyFilter();
@@ -66,10 +66,10 @@ int ImageEnhancer::run() {
     cv::imshow(medianFilteredImageWindowName, medianFilteredImage);
 
 
-    string meanFilteredImageWindowName = "Mean Filtered Image";
+    string lowPassFilteredImageWindowName = "Low Pass Filtered Image";
 
-    cv::namedWindow(meanFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(meanFilteredImageWindowName, meanFilteredImage);
+    cv::namedWindow(lowPassFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
+    cv::imshow(lowPassFilteredImageWindowName, lowPassFilteredImage);
 
     string highPassFilteredImageWindowName = "High Pass Filtered Image";
 

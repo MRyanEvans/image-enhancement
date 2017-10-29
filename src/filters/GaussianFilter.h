@@ -6,6 +6,9 @@
 
 #include "SpatialDomainFilter.h"
 
+/**
+ * Filter which applies a Gaussian filter to a given image.
+ */
 class GaussianFilter : public SpatialDomainFilter {
 public:
     explicit GaussianFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};

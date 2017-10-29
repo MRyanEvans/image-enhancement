@@ -1,9 +1,12 @@
-#include "MeanFilter.h"
+#include "LowPassFilter.h"
 #include "../kernel.h"
 #include "../KernelImageConvolver.h"
 
-std::unique_ptr<cv::Mat> MeanFilter::applyFilter() {
-
+/**
+ * Applies a low pass (averaging) kernel to an image.
+ * @return The averaged image.
+ */
+std::unique_ptr<cv::Mat> LowPassFilter::applyFilter() {
     std::vector<int> coefficients{1, 1, 1,
                                   1, 1, 1,
                                   1, 1, 1

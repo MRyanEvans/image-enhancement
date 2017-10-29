@@ -4,6 +4,10 @@
 
 #include "SpatialDomainFilter.h"
 
+/**
+ * Applies a Median Filter to an image.
+ * This uses the median value of the neighbourhood as the center pixel value.
+ */
 class MedianFilter : public SpatialDomainFilter {
 public:
     explicit MedianFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
