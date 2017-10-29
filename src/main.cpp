@@ -6,7 +6,6 @@
 #include "filters/MeanFilter.h"
 #include "filters/HighPassFilter.h"
 #include "filters/GaussianFilter.h"
-#include "filters/SobelFilter.h"
 
 using namespace std;
 using namespace cv;
