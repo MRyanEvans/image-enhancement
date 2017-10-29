@@ -6,6 +6,7 @@
 #include "filters/MeanFilter.h"
 #include "filters/HighPassFilter.h"
 #include "filters/GaussianFilter.h"
+#include "FilterApplicator.h"
 
 using namespace std;
 using namespace cv;
@@ -70,13 +71,17 @@ void runDFT(Mat image) {
     // viewable image form (float between values 0 and 1).
 
 
-//    ------------------
+
+//    Mat kernel = (Mat_<double>(3,3) <<  1.36, 0.062,  -0.921,
+//            -0.644198,  1.10, -0.17,
+//            -0.072951, -1.81485,  2.806);
+//
+//    Mat convolved;
+//    multiply(dftOutput, dftKernel, convolved);
 
     cv::Mat inverseTransform;
-    idft(dftOutput, inverseTransform);
-//    Mat kernel = buildKernel();
-//
-//    filter2D(image, inverseTransform, -1, kernel);
+//    idft(convolved, inverseTransform, DFT_REAL_OUTPUT);
+
 
     const char *inverseDftWindowName = "Inverse DFT";
 
@@ -85,11 +90,38 @@ void runDFT(Mat image) {
 
 }
 
+float
+calculateMeanSquaredError(Mat* originalImage, Mat* modifiedImage) {
+    float mse;
+    int M = originalImage->cols;
+    int N = originalImage->rows;
+    int sumSquaredError = 0;
+    for (int x = 0; x < M; x++) {
+        for (int y = 0; y < N; y++) {
+            int valueOriginal= originalImage->at<uchar>(y, x);
+            int valueModified = modifiedImage->at<uchar>(y, x);
+            int error = valueOriginal - valueModified;
+            sumSquaredError += (error * error);
+        }
+
+    }
+    mse = (float) sumSquaredError / (float) (M * N);
+    return mse;
+}
+
 int main() {
     string filename = "resources/images/PandaNoise.bmp";
     auto image = make_shared<cv::Mat>(cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE));
 
     if (!image.get()->data) {
+        cout << "Could not open image:  " << filename << endl;
+        return -1;
+    }
+
+    string originalImageFilename = "resources/images/PandaOriginal.bmp";
+    Mat originalImage = cv::imread(originalImageFilename, CV_LOAD_IMAGE_GRAYSCALE);
+
+    if (!originalImage.data) {
         cout << "Could not open image:  " << filename << endl;
         return -1;
     }
@@ -105,6 +137,11 @@ int main() {
 
     unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
     auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
+
+    string originalImageWindowName = "Original Image";
+
+    cv::namedWindow(originalImageWindowName, cv::WINDOW_AUTOSIZE);
+    cv::imshow(originalImageWindowName, originalImage);
 
     string noisyImageWindowName = "Image with Noise";
 
@@ -132,7 +169,8 @@ int main() {
     cv::namedWindow(gaussianFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
     cv::imshow(gaussianFilteredImageWindowName, gaussianFilteredImage);
 
-
+    float mse = calculateMeanSquaredError(&originalImage, &gaussianFilteredImage);
+    cout << mse << endl;
     cv::waitKey(0);
 
     return 0;
