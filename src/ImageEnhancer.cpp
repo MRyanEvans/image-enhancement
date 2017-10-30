@@ -36,9 +36,9 @@ int ImageEnhancer::run() {
         return -1;
     }
 
-    map<const char*, cv::Mat> filteredImages;
-
-
+    /*
+     * Apply all filters to the image.
+     */
     unique_ptr<MedianFilter> medianFilter = make_unique<MedianFilter>(image);
     auto medianFilteredImage = *(medianFilter.get())->applyFilter();
 
@@ -51,28 +51,21 @@ int ImageEnhancer::run() {
     unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
     auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
 
+    map<const char*, cv::Mat> filteredImages;
+
+    // Add the filtered images to a map for further processing
     filteredImages[MedianFilter::getName()] = medianFilteredImage;
     filteredImages[LowPassFilter::getName()] = lowPassFilteredImage;
     filteredImages[HighPassFilter::getName()] = highPassFilteredImage;
     filteredImages[GaussianFilter::getName()] = gaussianFilteredImage;
 
-    for (auto const& entry : filteredImages ) {
-        cv::namedWindow(entry.first, cv::WINDOW_AUTOSIZE);
-        saveFilteredImage(entry.second, entry.first);
-    }
+    saveImagesToDisk(filteredImages);
 
-    std::ofstream mseOutput("output/mse.csv");
-    mseOutput << "FILTER" << "," << "MSE" << endl;
-    for (auto & entry : filteredImages ) {
-        float mse = calculateMeanSquareError(&originalImage, &(entry.second));
-        cout << "Mean Squared Error of " << entry.first << ":  " << mse << endl;
-        mseOutput << entry.first << "," << mse << endl;
-    }
-    mseOutput.close();
-
+    calculateMSEsComparedToOriginal(filteredImages, originalImage);
 
     return 0;
 }
+
 
 /**
  * Calculate the Mean Square Error (MSE) of the modified (noise-filtered) image compared to the original image.
@@ -98,11 +91,40 @@ float ImageEnhancer::calculateMeanSquareError(cv::Mat *originalImage, cv::Mat *m
     mse = (float) sumSquaredError / (float) (M * N);
     return mse;
 }
-
+ /**
+  * Writes a map of processed images to disk.
+  * @param images The map of images to save.
+  */
+void ImageEnhancer::saveImagesToDisk(map<const char*, cv::Mat> images) {
+    for (auto const& entry : images ) {
+        saveFilteredImage(entry.second, entry.first);
+    }
+}
+/**
+ * Writes a given image to disk.
+ * @param image The image to write.
+ * @param filename The name of the file to write (excluding file extension).
+ */
 void ImageEnhancer::saveFilteredImage(const cv::Mat image, const std::string filename) {
     string path = "output/" + filename + ".bmp";
     cv::imwrite(path, image);
 }
 
+/**
+ * Calculates and outputs the Mean Squared Errors for a map of filtered images.
+ * @param filteredImages The map of processed images.
+ * @param originalImage The unmodified image used to calculated MSEs.
+ */
+void  ImageEnhancer::calculateMSEsComparedToOriginal(map<const char*, cv::Mat> filteredImages, cv::Mat originalImage) {
+
+    std::ofstream mseOutput("output/mse.csv");
+    mseOutput << "FILTER" << "," << "MSE" << endl;
+    for (auto & entry : filteredImages ) {
+        float mse = calculateMeanSquareError(&originalImage, &(entry.second));
+        cout << "Mean Squared Error of " << entry.first << ":  " << mse << endl;
+        mseOutput << entry.first << "," << mse << endl;
+    }
+    mseOutput.close();
+}
 
 
