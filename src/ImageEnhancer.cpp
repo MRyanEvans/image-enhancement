@@ -4,6 +4,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv/cv.hpp>
+#include <map>
+#include <fstream>
 #include "ImageEnhancer.h"
 #include "filters/MedianFilter.h"
 #include "filters/LowPassFilter.h"
@@ -34,7 +36,8 @@ int ImageEnhancer::run() {
         return -1;
     }
 
-    //TODO put these into a map/vector
+    map<const char*, cv::Mat> filteredImages;
+
 
     unique_ptr<MedianFilter> medianFilter = make_unique<MedianFilter>(image);
     auto medianFilteredImage = *(medianFilter.get())->applyFilter();
@@ -48,44 +51,25 @@ int ImageEnhancer::run() {
     unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
     auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
 
-    //TODO read from a map/vector to display images
+    filteredImages[MedianFilter::getName()] = medianFilteredImage;
+    filteredImages[LowPassFilter::getName()] = lowPassFilteredImage;
+    filteredImages[HighPassFilter::getName()] = highPassFilteredImage;
+    filteredImages[GaussianFilter::getName()] = gaussianFilteredImage;
 
-    string originalImageWindowName = "Original Image";
+    for (auto const& entry : filteredImages ) {
+        cv::namedWindow(entry.first, cv::WINDOW_AUTOSIZE);
+        saveFilteredImage(entry.second, entry.first);
+    }
 
-    cv::namedWindow(originalImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(originalImageWindowName, originalImage);
+    std::ofstream mseOutput("output/mse.csv");
+    mseOutput << "FILTER" << "," << "MSE" << endl;
+    for (auto & entry : filteredImages ) {
+        float mse = calculateMeanSquareError(&originalImage, &(entry.second));
+        cout << "Mean Squared Error of " << entry.first << ":  " << mse << endl;
+        mseOutput << entry.first << "," << mse << endl;
+    }
+    mseOutput.close();
 
-    string noisyImageWindowName = "Image with Noise";
-
-    cv::namedWindow(noisyImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(noisyImageWindowName, *(image.get()));
-
-    string medianFilteredImageWindowName = "Median Filtered Image";
-
-    cv::namedWindow(medianFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(medianFilteredImageWindowName, medianFilteredImage);
-
-
-    string lowPassFilteredImageWindowName = "Low Pass Filtered Image";
-
-    cv::namedWindow(lowPassFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(lowPassFilteredImageWindowName, lowPassFilteredImage);
-
-    string highPassFilteredImageWindowName = "High Pass Filtered Image";
-
-    cv::namedWindow(highPassFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(highPassFilteredImageWindowName, highPassFilteredImage);
-
-    string gaussianFilteredImageWindowName = "Gaussian Filtered Image";
-
-    cv::namedWindow(gaussianFilteredImageWindowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(gaussianFilteredImageWindowName, gaussianFilteredImage);
-
-    //TODO read from a map/vector to display MSEs
-    float mse = calculateMeanSquareError(&originalImage, &gaussianFilteredImage);
-    cout << "Mean Squared Error of " << gaussianFilteredImageWindowName << ":  " << mse << endl;
-
-    cv::waitKey(0);
 
     return 0;
 }
@@ -114,3 +98,11 @@ float ImageEnhancer::calculateMeanSquareError(cv::Mat *originalImage, cv::Mat *m
     mse = (float) sumSquaredError / (float) (M * N);
     return mse;
 }
+
+void ImageEnhancer::saveFilteredImage(const cv::Mat image, const std::string filename) {
+    string path = "output/" + filename + ".bmp";
+    cv::imwrite(path, image);
+}
+
+
+

@@ -8,6 +8,7 @@ public:
     int run();
 private:
     float calculateMeanSquareError(cv::Mat *originalImage, cv::Mat *modifiedImage);
+    void saveFilteredImage(const cv::Mat image, const std::string filename) ;
 };
 
 

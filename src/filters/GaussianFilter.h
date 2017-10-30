@@ -14,7 +14,9 @@ public:
     explicit GaussianFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
 
     std::unique_ptr<cv::Mat> applyFilter() override;;
-
+    static const char* getName() {
+        return "GaussianFilter";
+    }
 };
 
 

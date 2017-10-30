@@ -24,6 +24,9 @@ public:
      */
     virtual std::unique_ptr<cv::Mat> applyFilter() = 0;
 
+    static const char* getName() {
+        return "FilterInterface";
+    }
 protected:
     std::shared_ptr<cv::Mat> sourceImage;
 };

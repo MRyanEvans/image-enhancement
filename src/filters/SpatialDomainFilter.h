@@ -10,7 +10,9 @@
 class SpatialDomainFilter : public FilterInterface {
 public:
     explicit SpatialDomainFilter(const std::shared_ptr<cv::Mat> image) : FilterInterface(image) {};
-
+    static const char* getName() {
+        return "SpatialDomainFilter";
+    }
 };
 
 

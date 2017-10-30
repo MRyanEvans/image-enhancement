@@ -13,7 +13,9 @@ public:
     explicit MedianFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
 
     std::unique_ptr<cv::Mat> applyFilter() override;;
-
+    static const char* getName() {
+        return "MedianFilter";
+    }
 private:
     std::vector<int>
     aggregateNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange);
