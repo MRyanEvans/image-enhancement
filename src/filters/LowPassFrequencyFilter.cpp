@@ -1,7 +1,9 @@
 
 
 #include <opencv/cv.hpp>
+#include <map>
 #include "LowPassFrequencyFilter.h"
+#include "../Utilities.h"
 
 std::unique_ptr<cv::Mat> LowPassFrequencyFilter::applyFilter() {
     std::unique_ptr<cv::Mat> outputImage = std::make_unique<cv::Mat>(
@@ -9,16 +11,11 @@ std::unique_ptr<cv::Mat> LowPassFrequencyFilter::applyFilter() {
             this->sourceImage.get()->cols,
             this->sourceImage.get()->type()
     );
+    //TODO refactor and comment
 
     return runDFT(this->sourceImage);
 }
 
-
-
-void LowPassFrequencyFilter::displayImage(std::string windowName, cv::Mat image) {
-    cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
-    cv::imshow(windowName, image);
-}
 
 void LowPassFrequencyFilter::takeDFT(cv::Mat &source, cv::Mat &destination) {
 
@@ -80,7 +77,6 @@ void LowPassFrequencyFilter::invertDFT(cv::Mat &source, cv::Mat &destination) {
 }
 
 std::unique_ptr<cv::Mat> LowPassFrequencyFilter::runDFT(std::shared_ptr<cv::Mat> image) {
-
     cv::Mat imageFloat;
     (*image.get()).convertTo(imageFloat, CV_32FC1, 1.0 / 255.0);
 
@@ -89,7 +85,9 @@ std::unique_ptr<cv::Mat> LowPassFrequencyFilter::runDFT(std::shared_ptr<cv::Mat>
 
     cv::Mat dftMagnitude;
     prepareImageForDisplay(dftOfImage, dftMagnitude, true);
-    //displayImage("DFT", dftMagnitude);
+
+    writeImageToFile("_Spectrum", dftMagnitude);
+
     recenterDFT(dftMagnitude);
 
     cv::Mat dftMagnitudeFiltered(dftMagnitude.rows, dftMagnitude.cols, dftMagnitude.type());
@@ -100,7 +98,7 @@ std::unique_ptr<cv::Mat> LowPassFrequencyFilter::runDFT(std::shared_ptr<cv::Mat>
             float upperThreshold = 1.0f;
             float thresholdedValue;
             // Remove frequencies within our filter range
-            if (value >= lowerThreshold && value <= upperThreshold ) {
+            if (value >= lowerThreshold && value <= upperThreshold) {
                 thresholdedValue = 1.0f;
             } else { // and keep all others the same
                 thresholdedValue = value;
@@ -110,7 +108,9 @@ std::unique_ptr<cv::Mat> LowPassFrequencyFilter::runDFT(std::shared_ptr<cv::Mat>
     }
 
     recenterDFT(dftMagnitudeFiltered);
-   // displayImage("Filtered DFT Magnitude", dftMagnitudeFiltered);
+
+    writeImageToFile("_Filtered_Spectrum", dftMagnitudeFiltered);
+
     recenterDFT(dftMagnitudeFiltered);
 
     cv::Mat planes[2] = {cv::Mat::zeros(dftOfImage.size(), CV_32F), cv::Mat::zeros(dftOfImage.size(), CV_32F)};
@@ -127,10 +127,14 @@ std::unique_ptr<cv::Mat> LowPassFrequencyFilter::runDFT(std::shared_ptr<cv::Mat>
     // Change scale from float 0..1 to 0..255 to be written to file correctly
     cv::Mat inverseDFTCorrectScale;
     inverseDFT.convertTo(inverseDFTCorrectScale, CV_8UC3, 255.0);
-//
-//    displayImage("Inverse DFT", inverseDFT);
-//    displayImage("Original", (*image.get()));
-
 
     return std::make_unique<cv::Mat>(inverseDFTCorrectScale);
+}
+
+void LowPassFrequencyFilter::writeImageToFile(const char *name, cv::Mat image) {
+    std::string filteredSpectrumFileName(getName());
+    filteredSpectrumFileName.append(name).c_str();
+    cv::Mat correctedImage;
+    image.convertTo(correctedImage, CV_8UC3, 255.0);
+    Utilities::saveFilteredImage(correctedImage, filteredSpectrumFileName.c_str());
 }

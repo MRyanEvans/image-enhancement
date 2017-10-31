@@ -26,6 +26,8 @@ private:
     void invertDFT(cv::Mat &source, cv::Mat &destination);
 
     std::unique_ptr<cv::Mat>runDFT(std::shared_ptr<cv::Mat> image);
+
+    void writeImageToFile(const char *name, cv::Mat image);
 };
 
 

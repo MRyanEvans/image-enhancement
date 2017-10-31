@@ -51,6 +51,7 @@ void Utilities::saveImagesToDisk(std::map<const char *, cv::Mat> images) {
  */
 void Utilities::saveFilteredImage(const cv::Mat image, const std::string filename) {
     std::string path = "output/" + filename + ".png";
+    std::cout << "Writing image to:  " << path << std::endl;
     cv::imwrite(path, image);
 }
 
