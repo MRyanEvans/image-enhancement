@@ -96,12 +96,13 @@ void runDFT(cv::Mat image) {
     for (int x = dftMagnitude.cols; x >= 0; x--) {
         for (int y = dftMagnitude.rows - 1; y >= 0; y--) {
             float value = dftMagnitude.at<float>(y, x);
-            cout << "(" << x << "," << y << "):  " << value << endl;
-            float threshold = 0.55f;
+            float lowerThreshold = 0.75f;
+            float upperThreshold = 1.0f;
             float thresholdedValue;
-            if (value > threshold) {
-                thresholdedValue = 0.0f;
-            } else {
+            // Remove frequencies within our filter range
+            if (value >= lowerThreshold && value <= upperThreshold ) {
+                thresholdedValue = 1.0f;
+            } else { // and keep all others the same
                 thresholdedValue = value;
             }
             dftMagnitudeFiltered.at<float>(y, x) = thresholdedValue;
@@ -125,6 +126,7 @@ void runDFT(cv::Mat image) {
 
 
     displayImage("Inverse DFT", inverseDFT);
+    displayImage("Original", image);
 
 
     cv::waitKey(0);
