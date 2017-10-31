@@ -97,7 +97,7 @@ void runDFT(cv::Mat image) {
         for (int y = dftMagnitude.rows - 1; y >= 0; y--) {
             float value = dftMagnitude.at<float>(y, x);
             cout << "(" << x << "," << y << "):  " << value << endl;
-            float threshold = 0.6f;
+            float threshold = 0.55f;
             float thresholdedValue;
             if (value > threshold) {
                 thresholdedValue = 0.0f;
@@ -112,8 +112,15 @@ void runDFT(cv::Mat image) {
     displayImage("Filtered DFT Magnitude", dftMagnitudeFiltered);
     recenterDFT(dftMagnitudeFiltered);
 
+    cv::Mat planes[2] = {cv::Mat::zeros(dftOfImage.size(), CV_32F), cv::Mat::zeros(dftOfImage.size(), CV_32F)};
+    planes[0] = dftMagnitudeFiltered;
+    cv::Mat kernelSpectrum;
+    cv::merge(planes, 2, kernelSpectrum);
+    cv::Mat outputSpectrum;
+    cv::mulSpectrums(dftOfImage, kernelSpectrum, outputSpectrum, cv::DFT_ROWS);
+
     cv::Mat inverseDFT;
-    invertDFT(dftOfImage, inverseDFT);
+    invertDFT(outputSpectrum, inverseDFT);
     prepareImageForDisplay(inverseDFT, inverseDFT, false);
 
 
