@@ -15,7 +15,6 @@ std::unique_ptr<cv::Mat> KernelImageConvolver::convolveKernelAndImage(Kernel ker
             image.get()->cols,
             image.get()->type()
     );
-    //TODO modularise this
 
     // The number of pixels to 'ignore' on each side to allow full neighbourhoods.
     // For example, a 3 x 3 kernel should be offset by one pixel.

@@ -14,6 +14,117 @@
 
 using namespace std;
 
+
+void displayImage(std::string windowName, cv::Mat image) {
+    cv::namedWindow(windowName, cv::WINDOW_AUTOSIZE);
+    cv::imshow(windowName, image);
+}
+
+void takeDFT(cv::Mat &source, cv::Mat &destination) {
+
+    cv::Mat imageComplex[2] = {source, cv::Mat::zeros(source.size(), CV_32F)};
+
+    cv::Mat dftReady;
+
+    cv::merge(imageComplex, 2, dftReady);
+
+    cv::Mat dftImage;
+    dft(dftReady, dftImage, cv::DFT_COMPLEX_OUTPUT);
+    destination = dftImage;
+}
+
+void recenterDFT(cv::Mat &source) {
+    int cx = source.cols / 2;
+    int cy = source.rows / 2;
+
+    cv::Mat q0(source, cv::Rect(0, 0, cx, cy));   // Top-Left - Create a ROI per quadrant
+    cv::Mat q1(source, cv::Rect(cx, 0, cx, cy));  // Top-Right
+    cv::Mat q2(source, cv::Rect(0, cy, cx, cy));  // Bottom-Left
+    cv::Mat q3(source, cv::Rect(cx, cy, cx, cy)); // Bottom-Right
+
+    cv::Mat tmp;                           // swap quadrants (Top-Left with Bottom-Right)
+    q0.copyTo(tmp);
+    q3.copyTo(q0);
+    tmp.copyTo(q3);
+
+    q1.copyTo(tmp);                    // swap quadrant (Top-Right with Bottom-Left)
+    q2.copyTo(q1);
+    tmp.copyTo(q2);
+
+}
+
+void prepareImageForDisplay(cv::Mat &source, cv::Mat &destination, bool recenter) {
+    cv::Mat splitArray[2] = {cv::Mat::zeros(source.size(), CV_32F), cv::Mat::zeros(source.size(), CV_32F)};
+    cv::split(source, splitArray);
+    cv::Mat dftMagnitude;
+    cv::magnitude(splitArray[0], splitArray[1], dftMagnitude);
+
+
+    dftMagnitude += cv::Scalar::all(1);
+    cv::log(dftMagnitude, dftMagnitude);
+
+    cv::normalize(dftMagnitude, dftMagnitude, 0, 1, CV_MINMAX);
+
+    if (recenter) {
+        recenterDFT(dftMagnitude);
+    }
+
+    destination = dftMagnitude;
+}
+
+void invertDFT(cv::Mat &source, cv::Mat &destination) {
+    cv::Mat inverse;
+
+    cv::idft(source, inverse, cv::DFT_REAL_OUTPUT | cv::DFT_SCALE);
+    destination = inverse;
+}
+
+void runDFT(cv::Mat image) {
+
+    cv::Mat imageFloat;
+    image.convertTo(imageFloat, CV_32FC1, 1.0 / 255.0);
+
+    cv::Mat dftOfImage;
+    takeDFT(imageFloat, dftOfImage);
+
+    cv::Mat dftMagnitude;
+    prepareImageForDisplay(dftOfImage, dftMagnitude, true);
+    displayImage("DFT", dftMagnitude);
+    recenterDFT(dftMagnitude);
+
+    cv::Mat dftMagnitudeFiltered(dftMagnitude.rows, dftMagnitude.cols, dftMagnitude.type());
+    for (int x = dftMagnitude.cols; x >= 0; x--) {
+        for (int y = dftMagnitude.rows - 1; y >= 0; y--) {
+            float value = dftMagnitude.at<float>(y, x);
+            cout << "(" << x << "," << y << "):  " << value << endl;
+            float threshold = 0.6f;
+            float thresholdedValue;
+            if (value > threshold) {
+                thresholdedValue = 0.0f;
+            } else {
+                thresholdedValue = value;
+            }
+            dftMagnitudeFiltered.at<float>(y, x) = thresholdedValue;
+        }
+    }
+
+    recenterDFT(dftMagnitudeFiltered);
+    displayImage("Filtered DFT Magnitude", dftMagnitudeFiltered);
+    recenterDFT(dftMagnitudeFiltered);
+
+    cv::Mat inverseDFT;
+    invertDFT(dftOfImage, inverseDFT);
+    prepareImageForDisplay(inverseDFT, inverseDFT, false);
+
+
+    displayImage("Inverse DFT", inverseDFT);
+
+
+    cv::waitKey(0);
+
+}
+
+
 /**
  * Orchestrate the image reading and filtering.
  * @return Whether the processing completed successfully.
@@ -36,6 +147,7 @@ int ImageEnhancer::run() {
         return -1;
     }
 
+    runDFT(*(image.get()));
     /*
      * Apply all filters to the image.
      */
@@ -51,7 +163,7 @@ int ImageEnhancer::run() {
     unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
     auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
 
-    map<const char*, cv::Mat> filteredImages;
+    map<const char *, cv::Mat> filteredImages;
 
     // Add the filtered images to a map for further processing
     filteredImages[MedianFilter::getName()] = medianFilteredImage;
@@ -91,22 +203,24 @@ float ImageEnhancer::calculateMeanSquareError(cv::Mat *originalImage, cv::Mat *m
     mse = (float) sumSquaredError / (float) (M * N);
     return mse;
 }
- /**
-  * Writes a map of processed images to disk.
-  * @param images The map of images to save.
-  */
-void ImageEnhancer::saveImagesToDisk(map<const char*, cv::Mat> images) {
-    for (auto const& entry : images ) {
+
+/**
+ * Writes a map of processed images to disk.
+ * @param images The map of images to save.
+ */
+void ImageEnhancer::saveImagesToDisk(map<const char *, cv::Mat> images) {
+    for (auto const &entry : images) {
         saveFilteredImage(entry.second, entry.first);
     }
 }
+
 /**
  * Writes a given image to disk.
  * @param image The image to write.
  * @param filename The name of the file to write (excluding file extension).
  */
 void ImageEnhancer::saveFilteredImage(const cv::Mat image, const std::string filename) {
-    string path = "output/" + filename + ".bmp";
+    string path = "output/" + filename + ".png";
     cv::imwrite(path, image);
 }
 
@@ -115,11 +229,11 @@ void ImageEnhancer::saveFilteredImage(const cv::Mat image, const std::string fil
  * @param filteredImages The map of processed images.
  * @param originalImage The unmodified image used to calculated MSEs.
  */
-void  ImageEnhancer::calculateMSEsComparedToOriginal(map<const char*, cv::Mat> filteredImages, cv::Mat originalImage) {
+void ImageEnhancer::calculateMSEsComparedToOriginal(map<const char *, cv::Mat> filteredImages, cv::Mat originalImage) {
 
     std::ofstream mseOutput("output/mse.csv");
     mseOutput << "FILTER" << "," << "MSE" << endl;
-    for (auto & entry : filteredImages ) {
+    for (auto &entry : filteredImages) {
         float mse = calculateMeanSquareError(&originalImage, &(entry.second));
         cout << "Mean Squared Error of " << entry.first << ":  " << mse << endl;
         mseOutput << entry.first << "," << mse << endl;
