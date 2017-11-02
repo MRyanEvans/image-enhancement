@@ -9,13 +9,13 @@
 /**
  * Filter which applies a Gaussian filter to a given image.
  */
-class GaussianFilter : public SpatialDomainFilter {
+class GaussianSpatialFilter : public SpatialDomainFilter {
 public:
-    explicit GaussianFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
+    explicit GaussianSpatialFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
 
     std::unique_ptr<cv::Mat> applyFilter() override;;
     static const char* getName() {
-        return "GaussianFilter";
+        return "GaussianSpatialFilter";
     }
 };
 

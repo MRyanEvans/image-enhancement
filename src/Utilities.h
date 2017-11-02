@@ -3,6 +3,7 @@
 #ifndef IMAGE_ENHANCEMENT_IMPLEMENTATION_UTILITIES_H
 #define IMAGE_ENHANCEMENT_IMPLEMENTATION_UTILITIES_H
 
+#include <map>
 
 class Utilities {
 public:

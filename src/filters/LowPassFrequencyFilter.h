@@ -6,28 +6,18 @@
 
 #include "FrequencyDomainFilter.h"
 
+/**
+ * Applies a low pass filter in the frequency domain.
+ */
 class LowPassFrequencyFilter : public FrequencyDomainFilter {
 public:
     explicit LowPassFrequencyFilter(const std::shared_ptr<cv::Mat> image) : FrequencyDomainFilter(image) {}
 
-    std::unique_ptr<cv::Mat> applyFilter() override;;
     static const char* getName() {
         return "LowPassFrequencyFilter";
     }
 
-private:
-
-    void takeDFT(cv::Mat &source, cv::Mat &destination);
-
-    void recenterDFT(cv::Mat &source);
-
-    void prepareImageForDisplay(cv::Mat &source, cv::Mat &destination, bool recenter);
-
-    void invertDFT(cv::Mat &source, cv::Mat &destination);
-
-    std::unique_ptr<cv::Mat>runDFT(std::shared_ptr<cv::Mat> image);
-
-    void writeImageToFile(const char *name, cv::Mat image);
+    void filterSpectrum(cv::Mat &spectrumMagnitude, cv::Mat &filteredSpectrum) override ;;
 };
 
 

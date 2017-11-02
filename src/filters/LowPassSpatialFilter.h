@@ -7,13 +7,13 @@
 /**
  * Applies a low pass filter kernel to an image.
  */
-class LowPassFilter : public SpatialDomainFilter {
+class LowPassSpatialFilter : public SpatialDomainFilter {
 public:
-    explicit LowPassFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
+    explicit LowPassSpatialFilter(const std::shared_ptr<cv::Mat> image) : SpatialDomainFilter(image) {};
 
     std::unique_ptr<cv::Mat> applyFilter() override;;
     static const char* getName() {
-        return "LowPassFilter";
+        return "LowPassSpatialFilter";
     }
 private:
 

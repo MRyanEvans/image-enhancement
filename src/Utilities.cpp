@@ -2,7 +2,7 @@
 
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
-#include <map>
+
 #include <iostream>
 #include <fstream>
 #include <opencv/cv.hpp>

@@ -5,12 +5,10 @@
 #include <opencv2/imgcodecs/imgcodecs_c.h>
 #include <opencv/cv.hpp>
 #include <map>
-#include <fstream>
 #include "ImageEnhancer.h"
-#include "filters/MedianFilter.h"
-#include "filters/LowPassFilter.h"
-#include "filters/HighPassFilter.h"
-#include "filters/GaussianFilter.h"
+#include "filters/MedianSpatialFilter.h"
+#include "filters/LowPassSpatialFilter.h"
+#include "filters/GaussianSpatialFilter.h"
 #include "filters/LowPassFrequencyFilter.h"
 #include "Utilities.h"
 
@@ -42,16 +40,13 @@ int ImageEnhancer::run() {
     /*
      * Apply all filters to the image.
      */
-    unique_ptr<MedianFilter> medianFilter = make_unique<MedianFilter>(image);
+    unique_ptr<MedianSpatialFilter> medianFilter = make_unique<MedianSpatialFilter>(image);
     auto medianFilteredImage = *(medianFilter.get())->applyFilter();
 
-    unique_ptr<LowPassFilter> lowPassFilter = make_unique<LowPassFilter>(image);
+    unique_ptr<LowPassSpatialFilter> lowPassFilter = make_unique<LowPassSpatialFilter>(image);
     auto lowPassFilteredImage = *(lowPassFilter.get())->applyFilter();
 
-    unique_ptr<HighPassFilter> highPassFilter = make_unique<HighPassFilter>(image);
-    auto highPassFilteredImage = *(highPassFilter.get())->applyFilter();
-
-    unique_ptr<GaussianFilter> gaussianFilter = make_unique<GaussianFilter>(image);
+    unique_ptr<GaussianSpatialFilter> gaussianFilter = make_unique<GaussianSpatialFilter>(image);
     auto gaussianFilteredImage = *(gaussianFilter.get())->applyFilter();
 
     unique_ptr<LowPassFrequencyFilter> lowPassFrequencyFilter = make_unique<LowPassFrequencyFilter>(image);
@@ -60,10 +55,9 @@ int ImageEnhancer::run() {
     map<const char *, cv::Mat> filteredImages;
 
     // Add the filtered images to a map for further processing
-    filteredImages[MedianFilter::getName()] = medianFilteredImage;
-    filteredImages[LowPassFilter::getName()] = lowPassFilteredImage;
-    filteredImages[HighPassFilter::getName()] = highPassFilteredImage;
-    filteredImages[GaussianFilter::getName()] = gaussianFilteredImage;
+    filteredImages[MedianSpatialFilter::getName()] = medianFilteredImage;
+    filteredImages[LowPassSpatialFilter::getName()] = lowPassFilteredImage;
+    filteredImages[GaussianSpatialFilter::getName()] = gaussianFilteredImage;
     filteredImages[LowPassFrequencyFilter::getName()] = lowPassFrequencyFilteredImage;
 
     Utilities::saveImagesToDisk(filteredImages);

@@ -1,10 +1,10 @@
-#include "MedianFilter.h"
+#include "MedianSpatialFilter.h"
 
 /**
  * Apply the median filter to the image.
  * @return The median filtered image.
  */
-std::unique_ptr<cv::Mat> MedianFilter::applyFilter() {
+std::unique_ptr<cv::Mat> MedianSpatialFilter::applyFilter() {
     std::unique_ptr<cv::Mat> outputImage = std::make_unique<cv::Mat>(
             this->sourceImage.get()->rows,
             this->sourceImage.get()->cols,
@@ -43,7 +43,7 @@ std::unique_ptr<cv::Mat> MedianFilter::applyFilter() {
  * @param yKernelRange The kernel's vertical descriptor.
  * @return A vector of the neighbourhood values.
  */
-std::vector<int> MedianFilter::aggregateNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange) {
+std::vector<int> MedianSpatialFilter::aggregateNeighbourhood(int centerX, int centerY, std::vector<int> xKernelRange, std::vector<int> yKernelRange) {
     std::vector<int> pixelValues;
     /**
      * Go over each kernel value;
@@ -64,7 +64,7 @@ std::vector<int> MedianFilter::aggregateNeighbourhood(int centerX, int centerY, 
  * @param values The list of pixel values.
  * @return The median value.
  */
-int MedianFilter::calculateMedianValueOfNeighbourhood(std::vector<int> values) {
+int MedianSpatialFilter::calculateMedianValueOfNeighbourhood(std::vector<int> values) {
     size_t n = values.size() / 2;
     std::sort(values.begin(), values.end());
     return values.at(n);
